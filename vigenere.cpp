@@ -4,8 +4,10 @@
 #include <sstream>
 #include <cctype>
 #include <cstring>
+#include <map>
 
 using namespace std;
+string getErrorMessage(int);
 string encodewithkey(string, string, int **);
 string decodewithkey(string, string, int **);
 string ReadFile(string);
@@ -38,7 +40,7 @@ int main(){
                         }else{
                             Tab[i][j] = modulo;
                         }
-                        //cout<< Tab[i][j] << " ";
+                        cout<< char(Tab[i][j]) << " ";
                     }
                     k++;
                     cout << endl;
@@ -79,6 +81,7 @@ int main(){
                 cout << "Niewlasciwy znak" <<endl;
         }
     }while(ccase != 'x');
+
     // zwalnianie pamieci
     for(int i = 0; i < 95; ++i) {
         delete [] Tab[i];
@@ -95,10 +98,10 @@ string encodewithkey(string Phrase, string Key, int **Tab){
     uint KeySize = Key.length();
     cout << "Rozmiar klucza: " << KeySize <<endl;
     int Tabbyte[PhraseSize], Tabkey[KeySize],j ;
-    int tmplength = Phrase.length();
+    unsigned int tmplength = Phrase.length();
     for (uint i = 0; i < KeySize; i++){
         Tabkey[i]=Key[i] - '\0';
-        cout << Tabkey[i]<<" ";
+        cout << char(Tabkey[i])<<" ";
     }
     for(uint i = 0; i < tmplength; i++){
         Tabbyte[i] = Crypted[i] - '\0';
@@ -120,11 +123,11 @@ string decodewithkey(string Phrase, string Key, int **Tab){
     uint KeySize = Key.length();
     cout << "Rozmiar klucza: " << KeySize <<endl;
     int Tabbyte[PhraseSize], Tabkey[KeySize],j ;
-    int tmplength = Phrase.length();
+    unsigned int tmplength = Phrase.length();
     for (uint i = 0; i < KeySize; i++){
         Tabkey[i]=Key[i] - '\0';
         Tabkey[i]=(127-Tabkey[i])%95 + 32;
-        cout << Tabkey[i]<<" ";
+        cout << char(Tabkey[i]);
     }
     for(uint i = 0; i < tmplength; i++){
         Tabbyte[i] = Crypted[i] - '\0';
@@ -156,20 +159,21 @@ string ReadFile(string filename){
         return phrase;
     }else {
         cerr << "Nie moge otworzyc pliku " << filename << endl; 
+        return getErrorMessage(10); 
     }
 }
 string ReadFileSW(string filename){
-    int length;
     string phrase, line;
     ifstream file (filename);
     if (file.is_open()){
-        while (getline (file,line) ){
+        /*while (*/getline (file,line);// ){
             istringstream dane(line);
-            dane >> phrase;}
+            dane >> phrase;//}
         file.close();
         return phrase;
     }else {
-        cerr << "Nie moge otworzyc pliku " << filename << endl; 
+        cerr << "Nie moge otworzyc pliku " << filename << endl;
+        return getErrorMessage(10); 
     }
 }
 bool WriteToFile(string filename, string phrase){
@@ -187,4 +191,19 @@ bool WriteToFile(string filename, string phrase){
         cerr << "Nie moge otworzyc pliku " << filename << endl; 
         return false;
     }
+}
+
+string getErrorMessage(int errorCode)
+{
+    static map<int, string> codes;
+    static bool initialized = false;
+    if (!initialized) {
+        codes[0]    = "No error.";
+        codes[10]   = "Read error.";
+        codes[40]   = "Network or protocol error.";
+        initialized = true;
+    }
+    if (codes.count(errorCode) > 0)
+        return codes[errorCode];
+    return "Unknown error.";
 }
